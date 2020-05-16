@@ -35,6 +35,7 @@ public class AnagramDictionary {
     private ArrayList<String> wordList = new ArrayList<>();
     private HashSet<String> wordSet = new HashSet<>();
     private HashMap<String, ArrayList<String>> lettersToWord = new HashMap<>();
+    private int wordLength = DEFAULT_WORD_LENGTH;
 
     public AnagramDictionary(Reader reader) throws IOException {
         BufferedReader in = new BufferedReader(reader);
@@ -56,7 +57,9 @@ public class AnagramDictionary {
     }
 
     public boolean isGoodWord(String word, String base) {
-        return true;
+        boolean isValidWord = wordSet.contains(word);
+        boolean isSubstring = word.contains(base);
+        return isValidWord && !isSubstring;
     }
 
     public List<String> getAnagrams(String targetWord) {
@@ -85,10 +88,36 @@ public class AnagramDictionary {
 
     public List<String> getAnagramsWithOneMoreLetter(String word) {
         ArrayList<String> result = new ArrayList<String>();
+        for (char ch = 'a'; ch <= 'z'; ++ch) {
+            String targetWord = word + ch;
+            String targetWordSorted = sortLetters(targetWord);
+            if (lettersToWord.containsKey(targetWordSorted)) {
+                result.addAll(lettersToWord.get(targetWordSorted));
+            }
+        }
         return result;
     }
 
     public String pickGoodStarterWord() {
-        return "stop";
+        // return "stop";
+        Random rand = new Random();
+        int starterWordIdx = rand.nextInt(wordList.size());
+        String starterWord = new String();
+        boolean foundGoodStarterWord = false;
+        while (!foundGoodStarterWord) {
+            starterWord = wordList.get(starterWordIdx);
+            if (starterWord.length() <= wordLength) {
+                List<String> anagrams = getAnagramsWithOneMoreLetter(starterWord);
+                if (anagrams.size() >= MIN_NUM_ANAGRAMS) {
+                    foundGoodStarterWord = true;
+                }
+            }
+
+            starterWordIdx = (starterWordIdx + 1) % wordList.size();
+        }
+
+        ++wordLength;
+
+        return starterWord;
     }
 }
