@@ -19,6 +19,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -28,12 +30,14 @@ public class AnagramDictionary {
     private static final int DEFAULT_WORD_LENGTH = 3;
     private static final int MAX_WORD_LENGTH = 7;
     private Random random = new Random();
+    private ArrayList<String> wordList = new ArrayList<>();
 
     public AnagramDictionary(Reader reader) throws IOException {
         BufferedReader in = new BufferedReader(reader);
         String line;
         while((line = in.readLine()) != null) {
             String word = line.trim();
+            wordList.add(word);
         }
     }
 
@@ -43,7 +47,25 @@ public class AnagramDictionary {
 
     public List<String> getAnagrams(String targetWord) {
         ArrayList<String> result = new ArrayList<String>();
+        String targetWordSorted = sortLetters(targetWord);
+        Iterator<String> it = wordList.iterator();
+        String dictWord;
+        while (it.hasNext()) {
+            dictWord = it.next();
+            if (dictWord.length() == targetWord.length()) {
+                if (targetWordSorted.equals(sortLetters(dictWord))) {
+                    result.add(dictWord);
+                }
+            }
+        }
         return result;
+    }
+
+    private String sortLetters(String word) {
+        char chars[] = word.toCharArray();
+        Arrays.sort(chars);
+        String sortedWord = new String(chars);
+        return sortedWord;
     }
 
     public List<String> getAnagramsWithOneMoreLetter(String word) {
