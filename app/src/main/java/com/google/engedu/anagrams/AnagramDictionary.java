@@ -35,6 +35,7 @@ public class AnagramDictionary {
     private ArrayList<String> wordList = new ArrayList<>();
     private HashSet<String> wordSet = new HashSet<>();
     private HashMap<String, ArrayList<String>> lettersToWord = new HashMap<>();
+    private HashMap<Integer, ArrayList<String>> sizeToWords = new HashMap<>();
     private int wordLength = DEFAULT_WORD_LENGTH;
 
     public AnagramDictionary(Reader reader) throws IOException {
@@ -44,6 +45,17 @@ public class AnagramDictionary {
             String word = line.trim();
             wordList.add(word);
             wordSet.add(word);
+            int size = word.length();
+            if (!sizeToWords.containsKey(size)) {
+                ArrayList<String> tempWordList = new ArrayList<>();
+                tempWordList.add(word);
+                sizeToWords.put(size, tempWordList);
+            }
+            else {
+                ArrayList<String> tempWordList = sizeToWords.get(size);
+                tempWordList.add(word);
+                sizeToWords.put(size, tempWordList);
+            }
             String sortedWord = sortLetters(word);
             if (lettersToWord.containsKey(sortedWord)) {
                 lettersToWord.get(sortedWord).add(word);
@@ -101,22 +113,23 @@ public class AnagramDictionary {
     public String pickGoodStarterWord() {
         // return "stop";
         Random rand = new Random();
-        int starterWordIdx = rand.nextInt(wordList.size());
+        ArrayList<String> limitedWordList = sizeToWords.get(wordLength);
+        int starterWordIdx = rand.nextInt(limitedWordList.size());
         String starterWord = new String();
         boolean foundGoodStarterWord = false;
         while (!foundGoodStarterWord) {
-            starterWord = wordList.get(starterWordIdx);
-            if (starterWord.length() <= wordLength) {
-                List<String> anagrams = getAnagramsWithOneMoreLetter(starterWord);
-                if (anagrams.size() >= MIN_NUM_ANAGRAMS) {
-                    foundGoodStarterWord = true;
-                }
+            starterWord = limitedWordList.get(starterWordIdx);
+            List<String> anagrams = getAnagramsWithOneMoreLetter(starterWord);
+            if (anagrams.size() >= MIN_NUM_ANAGRAMS) {
+                foundGoodStarterWord = true;
             }
 
             starterWordIdx = (starterWordIdx + 1) % wordList.size();
         }
 
-        ++wordLength;
+        if (wordLength < MAX_WORD_LENGTH) {
+            ++wordLength;
+        }
 
         return starterWord;
     }
