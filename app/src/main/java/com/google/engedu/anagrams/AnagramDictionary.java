@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -31,6 +33,8 @@ public class AnagramDictionary {
     private static final int MAX_WORD_LENGTH = 7;
     private Random random = new Random();
     private ArrayList<String> wordList = new ArrayList<>();
+    private HashSet<String> wordSet = new HashSet<>();
+    private HashMap<String, ArrayList<String>> lettersToWord = new HashMap<>();
 
     public AnagramDictionary(Reader reader) throws IOException {
         BufferedReader in = new BufferedReader(reader);
@@ -38,6 +42,16 @@ public class AnagramDictionary {
         while((line = in.readLine()) != null) {
             String word = line.trim();
             wordList.add(word);
+            wordSet.add(word);
+            String sortedWord = sortLetters(word);
+            if (lettersToWord.containsKey(sortedWord)) {
+                lettersToWord.get(sortedWord).add(word);
+            }
+            else {
+                ArrayList<String> newWordList = new ArrayList<>();
+                newWordList.add(word);
+                lettersToWord.put(sortedWord, newWordList);
+            }
         }
     }
 
@@ -48,6 +62,7 @@ public class AnagramDictionary {
     public List<String> getAnagrams(String targetWord) {
         ArrayList<String> result = new ArrayList<String>();
         String targetWordSorted = sortLetters(targetWord);
+
         Iterator<String> it = wordList.iterator();
         String dictWord;
         while (it.hasNext()) {
